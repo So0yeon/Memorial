@@ -1062,8 +1062,8 @@ const SCENES = {
   student_03b: {
     location: "훈련소 · 경기도",
     title: "빈칸",
+    bg: "training_blank.png",
     text: "지원서의 그 빈칸이 자꾸 생각납니다. 할 말이 없었던 건지, 너무 많았던 건지.\n\n훈련 중에도, 행군 중에도, 그 빈칸이 눈앞에 어른거립니다.",
-    bg: "training_camp.png",
     choices: [
       { text: "편지를 쓴다 — 늦었지만, 지금이라도", statHint: "📜기록↑ ❤️온기+", effects: { record: 15, warmth: 10 }, next: "frontline_01" },
       { text: "감정을 다스리고 임무에 집중한다", statHint: "⚖️책임↑", effects: { duty: 10 }, next: "frontline_01" },
@@ -1099,8 +1099,8 @@ const SCENES = {
   soldier_02b: {
     location: "통신소 · 혼돈 속",
     title: "잡음 속의 진실",
+    bg: "radio_chaos.png",
     text: "무전기 너머로 수많은 목소리가 뒤섞입니다. 패주하는 군인들, 부르짖는 민간인들, 명령과 비명.\n\n당신은 이 모든 것을 듣고 있습니다. 기록해야 한다고 생각합니다. 누군가는 이것을 남겨야 한다고.",
-    bg: "radio_operator.png",
     choices: [
       { text: "들리는 것들을 노트에 받아 적는다", statHint: "📜기록↑↑", effects: { record: 20 }, next: "soldier_03" },
       { text: "무전으로 현황을 본부에 계속 보고한다", statHint: "⚖️책임↑ 📜기록+", effects: { duty: 15, record: 10 }, next: "soldier_03" },
@@ -1110,8 +1110,8 @@ const SCENES = {
   soldier_02c: {
     location: "한강 다리 · 새벽",
     title: "명령은 명령이다",
+    bg: "bridge_explosion.png",
     text: "명령을 전달했습니다. 무전기를 내려놓았습니다.\n\n폭발 소리가 들렸을 때, 당신은 눈을 감았습니다. 명령이었다고, 어쩔 수 없었다고. 하지만 눈 뒤에는 다리를 건너던 사람들의 얼굴이 있었습니다.",
-    bg: "hangang_bridge.png",
     choices: [
       { text: "그 무게를 평생 안고 살아가기로 한다", statHint: "📜기록↑ ❤️온기-", effects: { record: 10, warmth: -5, duty: 5 }, next: "soldier_03" },
       { text: "살아남기 위해 감정을 접는다", statHint: "🛡️안전+", effects: { safety: 15, warmth: -10 }, next: "soldier_03" },
@@ -1208,9 +1208,9 @@ const SCENES = {
 
   village_stay: {
     location: "서울 · 텅 빈 마을",
+    bg: "empty_village.png",
     title: "남은 사람들",
     text: "마을에 남은 것은 노인들과 몇몇 아이들뿐입니다. 당신은 우물에서 물을 길어 나르고, 음식을 나눕니다.\n\n사흘이 지났습니다. 인민군이 들어왔습니다.",
-    bg: "empty_village.png",
     choices: [
       { text: "조용히 지내며 주목받지 않으려 한다", statHint: "🛡️안전+", effects: { safety: 15 }, next: "occupation_01" },
       { text: "노인들을 데리고 밤에 피난을 시도한다", statHint: "❤️온기↑ 🛡️안전↓", effects: { warmth: 20, safety: -15 }, next: "refugee_bridge" },
@@ -1253,9 +1253,9 @@ const SCENES = {
 
   bridge_moment: {
     location: "한강 다리 위",
+    bg: "bridge_helping.png",
     title: "살아있어요",
     text: "그는 살아있습니다. 다리가 풀려서 움직일 수가 없었다고 합니다. 아내와 아이들은 앞서 건넜다고.\n\n당신은 그를 부축해서 다리를 건넙니다. 무거웠습니다. 하지만 당신은 끝까지 놓지 않았습니다.",
-    bg: "hangang_bridge.png",
     choices: [
       { text: "강 건너에서 그의 가족을 함께 찾는다", statHint: "❤️온기↑↑", effects: { warmth: 20, safety: -5 }, next: "south_01" },
       { text: "무사히 건넌 것을 확인하고 각자의 길로 간다", statHint: "⚖️책임+", effects: { duty: 10, warmth: 5 }, next: "south_01" },
@@ -1289,9 +1289,9 @@ const SCENES = {
 
   student_letter: {
     location: "낙동강 · 천막 옆",
+    bg: "student_letter.png",
     title: "어머니께",
     text: "소년이 쓰던 편지를 내려놓습니다. '부쳐도 닿지 않을 것 같아서요.' 그는 쓴웃음을 짓습니다.\n\n'그래도 써요. 쓰는 동안은 어머니가 살아 계신 것 같아서.'\n\n잠시 침묵이 흐릅니다.",
-    bg: "naktong_river.png",
     choices: [
       { text: "대신 부쳐주겠다고 약속한다", statHint: "❤️온기↑ ⚖️책임↑", effects: { warmth: 15, duty: 15 }, next: "promise_01" },
       { text: "내 이야기도 들려준다", statHint: "❤️온기+ 📜기록+", effects: { warmth: 10, record: 10 }, next: "promise_01" },
@@ -1301,9 +1301,9 @@ const SCENES = {
 
   promise_01: {
     location: "낙동강 방어선",
+    bg: "promise_letter.png",
     title: "약속",
     text: "다음 날 전투가 시작됩니다. 당신은 그 소년을 다시 보지 못했습니다.\n\n편지는 당신의 품에 있습니다.\n\n그의 이름은 김성호, 열여섯 살, 경북 안동 출신.",
-    bg: "battle_naktong.png",
     record: { title: "김성호의 편지", text: "수많은 학도병들이 남긴 편지들은 훗날 유족들에게 전해졌다. 그리고 일부는 영영 전해지지 못했다." },
     choices: [
       { text: "편지를 반드시 전하겠다고 다짐한다", statHint: "⚖️책임↑↑ ❤️온기+", effects: { duty: 20, warmth: 10 }, next: "heungnam_01" },
@@ -1324,9 +1324,9 @@ const SCENES = {
 
   river_reflection: {
     location: "낙동강 강가",
+    bg: "river_reflection.png",
     title: "강이 흐른다",
     text: "강은 전쟁과 상관없이 흐릅니다. 물결 소리가 포성보다 크게 들리는 순간이 있습니다.\n\n당신은 이 강이 기억하고 있을 것들을 생각합니다. 수백 년 전부터 이 자리를 흘렀을 강이.",
-    bg: "naktong_river.png",
     choices: [
       { text: "강가에 이름을 새긴다 — 내가 여기 있었다고", statHint: "📜기록↑", effects: { record: 15 }, next: "heungnam_01" },
       { text: "수첩을 꺼내 오늘을 기록한다", statHint: "📜기록↑↑", effects: { record: 20, warmth: 5 }, next: "heungnam_01" },
@@ -1376,8 +1376,8 @@ const SCENES = {
   heungnam_02b: {
     location: "흥남 부두 · 남은 자",
     title: "남겨진 자리",
+    bg: "heungnam_waiting.png",
     text: "배가 떠납니다. 당신은 부두에 남았습니다. 다음 배가 올지 모릅니다. 아니, 오지 않을 수도 있습니다.\n\n옆에 선 사람들과 눈이 마주칩니다. 같은 마음입니다.",
-    bg: "heungnam_port.png",
     choices: [
       { text: "다음 배를 기다리며 사람들을 안정시킨다", statHint: "❤️온기+ ⚖️책임↑", effects: { warmth: 15, duty: 20 }, next: "heungnam_miracle" },
       { text: "다른 탈출로를 찾아 움직인다", statHint: "🛡️안전+", effects: { safety: 20 }, next: "heungnam_03" },
