@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1950, 마지막 선택 — 기억의 무게</title>
+<style>
+/* ===== BASE & VARIABLES ===== */
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Nanum+Gothic:wght@400;700&family=Noto+Serif+KR:wght@300;400;600&display=swap');
+
+:root {
+  --paper: #e8e0d0;
+  --paper-dark: #c8bfaa;
+  --ink: #1a1612;
+  --ink-light: #3d342a;
+  --ink-fade: #6b5d4f;
+  --sepia: #8b6f47;
+  --sepia-light: #c4a882;
+  --red-blood: #8b1a1a;
+  --gold-old: #9a7b3a;
+  --shadow: rgba(26,22,18,0.6);
+  --grain-opacity: 0.04;
+
+  --stat-warmth: #c0392b;
+  --stat-safety: #2c5f8a;
+  --stat-record: #6b5d4f;
+  --stat-duty: #4a6741;
+
+  --transition-slow: 1.2s ease;
+  --transition-med: 0.6s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0d0b08;
+  color: var(--ink);
+  font-family: 'Nanum Myeongjo', 'Noto Serif KR', serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ===== GRAIN OVERLAY ===== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: var(--grain-opacity);
+  pointer-events: none;
+  z-index: 9999;
+  animation: grainShift 0.5s steps(2) infinite;
+}
+
+@keyframes grainShift {
+  0%, 100% { transform: translate(0,0); }
+  25% { transform: translate(-1px, 1px); }
+  75% { transform: translate(1px, -1px); }
+}
+
+/* ===== SCANLINES ===== */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ===== GAME WRAPPER ===== */
+#game-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== BACKGROUND IMAGE ===== */
+#scene-bg {
+  position: fixed;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 1.5s ease, background-image 0s;
+  filter: grayscale(85%) sepia(40%) brightness(0.35) contrast(1.1);
+  z-index: 0;
+}
+
+#scene-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(13,11,8,0.7) 100%);
+}
+
+/* ===== TITLE SCREEN ===== */
+#title-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #0d0b08;
+  transition: opacity 1.5s ease;
+}
+
+#title-screen .title-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(139,107,71,0.08) 0%, transparent 70%),
+    #0d0b08;
+  overflow: hidden;
+}
+
+#title-screen .title-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 40px,
+    rgba(139,107,71,0.015) 40px,
+    rgba(139,107,71,0.015) 41px
+  );
+}
+
+.title-year {
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: clamp(4rem, 12vw, 9rem);
+  font-weight: 800;
+  color: var(--paper);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  position: relative;
+  text-shadow: 0 0 80px rgba(196,168,130,0.15), 2px 4px 0 rgba(0,0,0,0.8);
+  animation: titleFlicker 4s ease-in-out infinite;
+}
+
+@keyframes titleFlicker {
+  0%, 90%, 100% { opacity: 1; }
+  92% { opacity: 0.85; }
+  94% { opacity: 1; }
+  96% { opacity: 0.9; }
+}
+
+.title-main {
+  font-size: clamp(1.4rem, 4vw, 2.6rem);
+  font-weight: 700;
+  color: var(--sepia-light);
+  letter-spacing: 0.15em;
+  margin-top: 0.5rem;
+  position: relative;
+}
+
+.title-sub {
+  font-size: clamp(0.75rem, 2vw, 0.95rem);
+  color: var(--ink-fade);
+  letter-spacing: 0.3em;
+  margin-top: 0.6rem;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-weight: 400;
+}
+
+.title-divider {
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sepia), transparent);
+  margin: 2rem auto;
+}
+
+.title-desc {
+  max-width: 400px;
+  text-align: center;
+  color: var(--ink-fade);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  line-height: 1.9;
+  letter-spacing: 0.05em;
+  padding: 0 1.5rem;
+}
+
+.btn-start {
+  margin-top: 2.5rem;
+  padding: 0.9rem 2.8rem;
+  background: transparent;
+  border: 1px solid var(--sepia);
+  color: var(--paper);
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.btn-start::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--sepia);
+  transform: translateX(-100%);
+  transition: transform 0.4s ease;
+  z-index: -1;
+}
+
+.btn-start:hover::before { transform: translateX(0); }
+.btn-start:hover { color: var(--ink); border-color: var(--sepia); }
+
+.static-lines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(139,107,71,0.03) 0px,
+    rgba(139,107,71,0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  animation: staticMove 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes staticMove {
+  from { background-position: 0 0; }
+  to { background-position: 0 100px; }
+}
+
+/* ===== AUDIO CONTROL ===== */
+#audio-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 200;
+  background: rgba(13,11,8,0.8);
+  border: 1px solid rgba(139,107,71,0.4);
+  color: var(--sepia-light);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+#audio-btn:hover { border-color: var(--sepia); color: var(--paper); }
+
+/* ===== STATS BAR ===== */
+#stats-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 0.6rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: linear-gradient(to bottom, rgba(13,11,8,0.95) 0%, rgba(13,11,8,0) 100%);
+  flex-wrap: wrap;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#stats-bar.visible { opacity: 1; }
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.7rem;
+  color: var(--paper-dark);
+}
+
+.stat-icon { font-size: 0.85rem; }
+
+.stat-bar {
+  width: 50px;
+  height: 3px;
+  background: rgba(139,107,71,0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.stat-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.stat-fill.warmth { background: var(--stat-warmth); }
+.stat-fill.safety { background: var(--stat-safety); }
+.stat-fill.record { background: var(--stat-record); }
+.stat-fill.duty { background: var(--stat-duty); }
+
+.stat-val {
+  font-size: 0.65rem;
+  color: var(--ink-fade);
+  min-width: 20px;
+}
+
+.stats-sep {
+  width: 1px;
+  height: 16px;
+  background: rgba(139,107,71,0.2);
+}
+
+/* ===== SCENE COUNTER ===== */
+#scene-counter {
+  margin-left: auto;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.65rem;
+  color: var(--ink-fade);
+  letter-spacing: 0.1em;
+}
+
+/* ===== MAIN GAME AREA ===== */
+#game-area {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 5rem 1rem 2rem;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+#game-area.visible { opacity: 1; }
+
+/* ===== SCENE CARD ===== */
+#scene-card {
+  width: 100%;
+  max-width: 680px;
+  background: rgba(13,11,8,0.88);
+  border: 1px solid rgba(139,107,71,0.25);
+  border-radius: 2px;
+  padding: 2rem 2rem 1.5rem;
+  position: relative;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(196,168,130,0.08);
+}
+
+#scene-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sepia), transparent);
+  opacity: 0.6;
+}
+
+/* ===== LOCATION TAG ===== */
+#location-tag {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.65rem;
+  color: var(--sepia);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#location-tag::before, #location-tag::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139,107,71,0.3));
+}
+#location-tag::after {
+  background: linear-gradient(90deg, rgba(139,107,71,0.3), transparent);
+}
+
+/* ===== SCENE TEXT ===== */
+#scene-title {
+  font-size: clamp(1rem, 3vw, 1.3rem);
+  font-weight: 700;
+  color: var(--paper);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  letter-spacing: 0.03em;
+}
+
+#scene-text {
+  font-size: clamp(0.8rem, 2.2vw, 0.92rem);
+  color: var(--paper-dark);
+  line-height: 2;
+  letter-spacing: 0.04em;
+  margin-bottom: 1.4rem;
+  min-height: 80px;
+}
+
+/* ===== RECORD CARD POPUP ===== */
+.record-badge {
+  display: inline-block;
+  background: rgba(154,123,58,0.15);
+  border: 1px solid rgba(154,123,58,0.4);
+  color: var(--gold-old);
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  padding: 0.2rem 0.6rem;
+  margin-bottom: 0.8rem;
+  border-radius: 1px;
+}
+
+/* ===== CHOICES ===== */
+#choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.choice-btn {
+  background: rgba(232,224,208,0.04);
+  border: 1px solid rgba(139,107,71,0.2);
+  color: var(--paper-dark);
+  padding: 0.8rem 1.2rem;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: clamp(0.75rem, 2vw, 0.88rem);
+  line-height: 1.7;
+  letter-spacing: 0.03em;
+  transition: all 0.25s ease;
+  position: relative;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.choice-btn::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--sepia);
+  transform: scaleY(0);
+  transition: transform 0.25s ease;
+}
+
+.choice-btn:hover {
+  background: rgba(139,107,71,0.1);
+  border-color: rgba(139,107,71,0.5);
+  color: var(--paper);
+}
+
+.choice-btn:hover::before { transform: scaleY(1); }
+
+.choice-stat-hint {
+  display: block;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.62rem;
+  color: var(--ink-fade);
+  margin-top: 0.25rem;
+  letter-spacing: 0.08em;
+}
+
+/* ===== CONTINUE BUTTON ===== */
+#continue-btn {
+  margin-top: 1rem;
+  background: transparent;
+  border: 1px solid rgba(139,107,71,0.3);
+  color: var(--sepia-light);
+  padding: 0.6rem 1.5rem;
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  width: 100%;
+  transition: all 0.3s ease;
+  display: none;
+}
+#continue-btn:hover { background: rgba(139,107,71,0.1); color: var(--paper); }
+#continue-btn.show { display: block; }
+
+/* ===== ENDING SCREEN ===== */
+#ending-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13,11,8,0.97);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.5s ease;
+  overflow-y: auto;
+  padding: 2rem 1rem;
+}
+
+#ending-screen.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.ending-inner {
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+}
+
+.ending-label {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.4em;
+  color: var(--sepia);
+  margin-bottom: 1.5rem;
+}
+
+.ending-title {
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
+  font-weight: 800;
+  color: var(--paper);
+  margin-bottom: 0.8rem;
+  line-height: 1.3;
+  text-shadow: 0 0 40px rgba(196,168,130,0.1);
+}
+
+.ending-divider {
+  width: 80px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sepia), transparent);
+  margin: 1.2rem auto;
+}
+
+.ending-text {
+  color: var(--paper-dark);
+  font-size: clamp(0.82rem, 2.5vw, 0.95rem);
+  line-height: 2.1;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.5rem;
+}
+
+.ending-reflection {
+  background: rgba(139,107,71,0.06);
+  border: 1px solid rgba(139,107,71,0.2);
+  border-radius: 2px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.ending-reflection p {
+  font-size: 0.82rem;
+  color: var(--sepia-light);
+  line-height: 1.9;
+  letter-spacing: 0.05em;
+  font-style: italic;
+}
+
+.ending-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.ending-stat-item {
+  background: rgba(232,224,208,0.04);
+  border: 1px solid rgba(139,107,71,0.15);
+  padding: 0.7rem;
+  text-align: center;
+}
+
+.ending-stat-label {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.65rem;
+  color: var(--ink-fade);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.3rem;
+}
+
+.ending-stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--paper);
+}
+
+.btn-restart {
+  padding: 0.8rem 2.2rem;
+  background: transparent;
+  border: 1px solid var(--sepia);
+  color: var(--paper);
+  font-family: 'Nanum Myeongjo', serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0.4rem;
+}
+.btn-restart:hover { background: rgba(139,107,71,0.15); }
+
+/* ===== RECORDS COLLECTION ===== */
+#records-btn {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 200;
+  background: rgba(13,11,8,0.85);
+  border: 1px solid rgba(154,123,58,0.4);
+  color: var(--gold-old);
+  padding: 0.45rem 0.9rem;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  display: none;
+}
+#records-btn:hover { border-color: var(--gold-old); color: var(--paper); }
+#records-btn.visible { display: block; }
+
+#records-panel {
+  position: fixed;
+  bottom: 3.5rem;
+  right: 1rem;
+  z-index: 200;
+  width: min(340px, calc(100vw - 2rem));
+  background: rgba(13,11,8,0.97);
+  border: 1px solid rgba(154,123,58,0.3);
+  padding: 1.2rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(8px);
+  max-height: 60vh;
+  overflow-y: auto;
+  backdrop-filter: blur(8px);
+}
+#records-panel.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+.records-title {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  color: var(--gold-old);
+  margin-bottom: 0.8rem;
+}
+
+.record-card {
+  background: rgba(154,123,58,0.06);
+  border: 1px solid rgba(154,123,58,0.2);
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.5rem;
+  border-radius: 1px;
+}
+
+.record-card-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--paper);
+  margin-bottom: 0.3rem;
+}
+
+.record-card-text {
+  font-size: 0.68rem;
+  color: var(--ink-fade);
+  line-height: 1.7;
+}
+
+.record-empty {
+  font-size: 0.75rem;
+  color: var(--ink-fade);
+  text-align: center;
+  padding: 1rem 0;
+  font-style: italic;
+}
+
+/* ===== TRANSITION OVERLAY ===== */
+#transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: #0d0b08;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+#transition-overlay.flash { opacity: 1; }
+
+/* ===== STAT CHANGE POPUP ===== */
+.stat-popup {
+  position: fixed;
+  top: 3.5rem;
+  right: 1rem;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  pointer-events: none;
+}
+
+.stat-change {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+  animation: statFloat 2s ease forwards;
+  white-space: nowrap;
+}
+
+.stat-change.up { background: rgba(0,100,0,0.15); color: #7fbf7f; border: 1px solid rgba(0,100,0,0.2); }
+.stat-change.down { background: rgba(139,26,26,0.15); color: #bf7f7f; border: 1px solid rgba(139,26,26,0.2); }
+
+@keyframes statFloat {
+  0% { opacity: 0; transform: translateY(4px); }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+
+/* ===== MEMORIAL QUOTE ===== */
+.memorial-quote {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-size: 0.65rem;
+  color: rgba(139,107,71,0.4);
+  font-style: italic;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  font-family: 'Nanum Gothic', sans-serif;
+  pointer-events: none;
+}
+
+/* ===== RADIO NOISE ANIMATION ===== */
+@keyframes radioNoise {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+.noise-indicator {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sepia);
+  animation: radioNoise 1.5s ease-in-out infinite;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  #scene-card { padding: 1.4rem 1.2rem 1.2rem; }
+  #stats-bar { gap: 0.4rem; }
+  .stat-bar { width: 35px; }
+  .ending-stats { grid-template-columns: 1fr 1fr; }
+}
+
+/* ===== HIDDEN ===== */
+.hidden { display: none !important; }
+
+/* ===== TYPEWRITER CURSOR ===== */
+.cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  background: var(--sepia-light);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+
+<!-- TRANSITION OVERLAY -->
+<div id="transition-overlay"></div>
+
+<!-- STAT POPUP CONTAINER -->
+<div class="stat-popup" id="stat-popup-container"></div>
+
+<!-- BACKGROUND -->
+<div id="scene-bg"></div>
+
+<!-- AUDIO BUTTON -->
+<button id="audio-btn" title="배경음악 ON/OFF" onclick="toggleAudio()">♪</button>
+
+<!-- RECORDS BUTTON -->
+<button id="records-btn" onclick="toggleRecords()">📜 기록 카드</button>
+<div id="records-panel">
+  <div class="records-title">◆ 수집된 기록 카드</div>
+  <div id="records-list"></div>
+</div>
+
+<!-- AUDIO (GitHub audio 폴더 경로 연결) -->
+<audio id="bg-audio" loop>
+  <source src="audio/bgm.mp3" type="audio/mpeg">
+  <source src="audio/bgm.ogg" type="audio/ogg">
+</audio>
+
+<!-- ===================== TITLE SCREEN ===================== -->
+<div id="title-screen">
+  <div class="title-bg">
+    <div class="static-lines"></div>
+  </div>
+  <div style="position:relative; text-align:center; padding: 0 1.5rem;">
+    <div class="title-year">1950</div>
+    <div class="title-main">마지막 선택</div>
+    <div class="title-sub">— 기억의 무게 —</div>
+    <div class="title-divider"></div>
+    <p class="title-desc">
+      전쟁은 총성으로 시작되었지만,<br>
+      기억은 선택으로 남는다.<br><br>
+      당신의 이야기가 역사가 됩니다.
+    </p>
+    <button class="btn-start" onclick="startGame()">▶ 이야기 시작하기</button>
+    <p style="margin-top:1.2rem; font-family:'Nanum Gothic',sans-serif; font-size:0.65rem; color:var(--ink-fade); letter-spacing:0.15em;">
+      현충일 계기교육 · 호국보훈의달
+    </p>
+  </div>
+</div>
+
+<!-- ===================== STATS BAR ===================== -->
+<div id="stats-bar">
+  <div class="stat-item">
+    <span class="stat-icon">❤️</span>
+    <div class="stat-bar"><div class="stat-fill warmth" id="stat-warmth-bar" style="width:50%"></div></div>
+    <span class="stat-val" id="stat-warmth-val">50</span>
+  </div>
+  <div class="stats-sep"></div>
+  <div class="stat-item">
+    <span class="stat-icon">🛡️</span>
+    <div class="stat-bar"><div class="stat-fill safety" id="stat-safety-bar" style="width:50%"></div></div>
+    <span class="stat-val" id="stat-safety-val">50</span>
+  </div>
+  <div class="stats-sep"></div>
+  <div class="stat-item">
+    <span class="stat-icon">📜</span>
+    <div class="stat-bar"><div class="stat-fill record" id="stat-record-bar" style="width:50%"></div></div>
+    <span class="stat-val" id="stat-record-val">50</span>
+  </div>
+  <div class="stats-sep"></div>
+  <div class="stat-item">
+    <span class="stat-icon">⚖️</span>
+    <div class="stat-bar"><div class="stat-fill duty" id="stat-duty-bar" style="width:50%"></div></div>
+    <span class="stat-val" id="stat-duty-val">50</span>
+  </div>
+  <div id="scene-counter" style="margin-left:auto;"></div>
+</div>
+
+<!-- ===================== GAME AREA ===================== -->
+<div id="game-area">
+  <div class="memorial-quote" id="memorial-quote"></div>
+  <div id="scene-card">
+    <div id="location-tag">위치</div>
+    <div class="record-badge hidden" id="record-badge">📜 기록 카드 획득</div>
+    <div id="scene-title"></div>
+    <div id="scene-text"></div>
+    <div id="choices"></div>
+    <button id="continue-btn" onclick="handleContinue()">계속하기 ›</button>
+  </div>
+</div>
+
+<!-- ===================== ENDING SCREEN ===================== -->
+<div id="ending-screen">
+  <div class="ending-inner">
+    <div class="ending-label">◆ 이야기의 끝 ◆</div>
+    <div class="ending-title" id="ending-title"></div>
+    <div class="ending-divider"></div>
+    <div class="ending-text" id="ending-text"></div>
+    <div class="ending-reflection" id="ending-reflection"></div>
+    <div class="ending-stats" id="ending-stats"></div>
+    <div style="margin-top:0.5rem;">
+      <button class="btn-restart" onclick="restartGame()">다시 이야기하기</button>
+    </div>
+    <p style="margin-top:1.2rem; font-family:'Nanum Gothic',sans-serif; font-size:0.65rem; color:var(--ink-fade); letter-spacing:0.15em;">
+      6월 6일, 현충일 · 우리는 기억합니다
+    </p>
+  </div>
+</div>
+
+<script>
+/* ===================================================================
+   1950, 마지막 선택 — 게임 엔진 + 씬 데이터
+=================================================================== */
+
+// ── CONFIG ──────────────────────────────────────────────────────────
+const CONFIG = {
+  bgImageBase: 'images/', // GitHub images/ 폴더
+  audioBase: 'audio/',
+  typewriterSpeed: 22,
+  transitionDuration: 600,
+};
+
+// ── GAME STATE ───────────────────────────────────────────────────────
+let state = {
+  currentScene: 'intro_01',
+  stats: { warmth: 50, safety: 50, record: 50, duty: 50 },
+  flags: {},
+  records: [],
+  sceneCount: 0,
+  audioOn: false,
+  history: [],
+};
+
+// ── MEMORIAL QUOTES ──────────────────────────────────────────────────
+const MEMORIAL_QUOTES = [
+  "이름 없는 용기가 나라를 지켰습니다",
+  "기억하는 자만이 진정 살아 있습니다",
+  "그날의 선택이 오늘을 만들었습니다",
+  "조국을 위해 스러진 이들을 기억하며",
+  "1950년 6월, 그들은 선택했습니다",
+];
+
+// ── ENDINGS ─────────────────────────────────────────────────────────
+const ENDINGS = {
+  keeper: {
+    title: "끝까지 서로를 지킨 사람",
+    text: "당신은 끝내 혼자가 아니었습니다. 전쟁이 모든 것을 앗아갔지만, 당신 곁에는 언제나 누군가가 있었습니다. 그 따뜻함이 당신을 살아남게 했고, 그 인연이 오래도록 당신의 이름을 기억하게 했습니다.",
+    reflection: "온기를 잃지 않는 것. 그것이 때로는 가장 용감한 일이었습니다. 당신처럼 살았던 수많은 이들이, 이름 없이도 기억됩니다.",
+    condition: (s) => s.warmth >= 70 && s.safety >= 40,
+  },
+  survivor: {
+    title: "냉정한 생존자",
+    text: "당신은 살아남았습니다. 그것이 전부라고, 스스로에게 말했습니다. 하지만 밤이 되면 기억이 찾아왔습니다. 내가 놓친 손들, 지나쳐 온 얼굴들. 살아남는 것과 살아가는 것은 달랐습니다.",
+    reflection: "생존은 죄가 아닙니다. 하지만 그 무게를 아는 당신은, 이미 충분히 인간적입니다.",
+    condition: (s) => s.safety >= 75 && s.warmth < 45,
+  },
+  chronicler: {
+    title: "그날을 남긴 기록자",
+    text: "당신은 총 대신 펜을 들었습니다. 아니, 부러진 연필이었을지도. 당신이 남긴 기록들은 시간을 건너 살아남았고, 훗날 누군가에게 '그때 정말 그랬구나'를 전해주었습니다.",
+    reflection: "기억은 무기입니다. 당신의 기록이 잊혀진 이들을 다시 살아 숨 쉬게 합니다.",
+    condition: (s) => s.record >= 70,
+  },
+  sentinel: {
+    title: "마지막까지 자리를 지킨 사람",
+    text: "당신은 떠날 수 있었지만, 남았습니다. 그것이 의무인지, 사랑인지, 당신도 몰랐습니다. 다만 그 자리에 있어야 한다고 느꼈고, 당신은 그렇게 했습니다. 그 자리는, 오래도록 당신의 이름으로 기억되었습니다.",
+    reflection: "누군가는 남아야 합니다. 그 용기를 선택한 당신은, 이 나라의 뿌리입니다.",
+    condition: (s) => s.duty >= 75,
+  },
+  shadow: {
+    title: "살아남은 그림자",
+    text: "당신은 이름 없이 살아남았습니다. 기록에도, 역사에도 남지 않은 그림자. 하지만 그것이 덜 진실인 것은 아닙니다. 수많은 이들이 그렇게 살다 갔고, 그 존재가 지금 우리의 일부가 되었습니다.",
+    reflection: "이름 없는 삶도 삶입니다. 당신의 이야기는, 기억하는 누군가의 마음속에 살아 있습니다.",
+    condition: (s) => s.warmth < 40 && s.record < 40 && s.safety >= 50,
+  },
+  peacemaker: {
+    title: "연결고리",
+    text: "당신은 경계 위에 서 있었습니다. 아군도, 적도, 전선도 흐릿해지는 곳에서 당신은 사람을 보았습니다. 그 선택이 옳은지 그른지 지금도 모릅니다. 하지만 당신은, 인간이었습니다.",
+    reflection: "전쟁이 만든 경계는 언제나 사람 사이를 지나갑니다. 그 경계를 넘어 손 내민 사람들이 있었기에, 지금 우리가 여기 있습니다.",
+    condition: (s) => s.warmth >= 60 && s.duty >= 60 && s.record >= 60,
+  },
+  hidden_memorial: {
+    title: "기억되는 이름",
+    text: "당신은 모든 것을 기억하려 했습니다. 살아남은 자의 기억이 얼마나 무거운지를 알면서도, 잊지 않으려 했습니다. 훗날 현충원에 가면, 당신은 이름 모를 비석 앞에서 오래도록 서 있곤 했습니다.\n\n'당신의 이름이 여기 없어도, 나는 기억합니다.'",
+    reflection: "현충일, 그 날짜가 왜 존재하는지 이제 조금 알 것 같습니다. 기억은 나라가 아니라, 사람이 하는 것입니다.",
+    condition: (s) => s.record >= 75 && s.warmth >= 65,
+    hidden: true,
+  },
+  broken_duty: {
+    title: "끊어진 신호",
+    text: "마지막 무전은 끝내 닿지 않았습니다. 당신의 임무는 절반만 완수되었고, 그 절반이 무엇을 의미했는지는 아무도 알려주지 않았습니다. 살아남았지만 책임감의 무게는 오래도록 당신을 짓눌렀습니다.",
+    reflection: "불완전한 책임도 책임입니다. 완벽할 수 없었던 상황에서 최선을 다한 당신을 기억합니다.",
+    condition: (s) => s.duty >= 55 && s.duty < 75 && s.safety < 55,
+  },
+  youthful_sacrifice: {
+    title: "꽃다운 나이에",
+    text: "당신은 너무 젊었습니다. 배움을 멈추고, 꿈을 접고, 총을 들었습니다. 그 나이에 가져야 할 것들을 모두 내려놓고도 앞으로 나아갔습니다. 그 발걸음이 얼마나 떨렸을지, 우리는 짐작도 못 합니다.",
+    reflection: "학도병, 그들의 평균 나이는 열여섯이었습니다. 책 대신 총을 들었던 그 손들을 기억합니다.",
+    condition: (s) => s.flags && s.flags.is_student && s.duty >= 60,
+  },
+};
+
+// ── SCENE DATA ───────────────────────────────────────────────────────
+// 구조: id, location, title, text, bg(optional), record(optional), choices[]
+// choice: { text, statHint, effects:{warmth,safety,record,duty}, next, flag(optional) }
+
+const SCENES = {
+
+  // ════════════════════════════════
+  //  ACT 1 — 서울, 1950년 6월 25일
+  // ════════════════════════════════
+
+  intro_01: {
+    location: "서울 · 1950년 6월 25일 새벽",
+    title: "총성",
+    text: "새벽 네 시. 라디오에서 이상한 소리가 들립니다. 처음엔 천둥인 줄 알았습니다. 창문 너머 북쪽 하늘이 붉게 물들기 시작합니다.\n\n이웃 어르신이 문을 두드립니다. '전쟁이야. 전쟁이 났어.'\n\n당신은 어떤 사람입니까?",
+    bg: "dawn_seoul.jpg",
+    choices: [
+      { text: "열아홉 살 학생 — 책과 꿈이 있는", statHint: "학도병의 길", effects: {}, next: "student_01", flag: "is_student" },
+      { text: "서른의 통신병 — 무선 장비를 다루는", statHint: "군인의 길", effects: {}, next: "soldier_01" },
+      { text: "마흔의 어머니 — 두 아이를 돌보는", statHint: "피난민의 길", effects: {}, next: "mother_01" },
+      { text: "스물다섯의 신문기자 — 진실을 기록하는", statHint: "기록자의 길", effects: {}, next: "journalist_01" },
+    ],
+  },
+
+  // ─── 학생 스토리 ───
+
+  student_01: {
+    location: "서울 종로 · 학교 근처",
+    title: "등교 대신",
+    text: "오늘은 기말시험 날이었습니다. 가방 안에는 밤새 정리한 노트가 있습니다. 하지만 학교 앞에는 군인들이 서 있고, 담벼락에는 '전시 휴교' 공고가 붙어 있습니다.\n\n친구 철수가 옆에 섭니다. '우리도 지원해야 하는 거 아니야? 나라가 위험한데.'",
+    bg: "school_1950.jpg",
+    choices: [
+      { text: "철수와 함께 자원입대 지원서를 쓴다", statHint: "⚖️책임↑ ❤️온기+", effects: { duty: 15, warmth: 5, safety: -10 }, next: "student_02a", flag: "volunteered" },
+      { text: "일단 집으로 돌아가 가족을 챙긴다", statHint: "❤️온기↑ ⚖️책임-", effects: { warmth: 10, duty: -5, safety: 5 }, next: "student_02b" },
+      { text: "피난 행렬을 따라 남쪽으로 향한다", statHint: "🛡️안전↑", effects: { safety: 15, duty: -10 }, next: "refugee_bridge" },
+    ],
+  },
+
+  student_02a: {
+    location: "서울 · 육군 입대 지원소",
+    title: "열여섯의 손",
+    text: "접수 창구 앞에 줄이 길게 늘어섰습니다. 당신 앞에는 당신보다 어려 보이는 아이도 있습니다. 나이를 속인 것이 분명합니다.\n\n담당 군인이 묻습니다. '몇 살이오?' 당신은 열아홉. 정식 입대 나이입니다.\n\n지원서 마지막 칸: 가족에게 남기는 말.",
+    bg: "army_recruit.jpg",
+    record: { title: "학도병 지원서", text: "1950년 6월, 수만 명의 학생이 총을 들었다. 그들의 평균 나이는 열여섯이었다." },
+    choices: [
+      { text: "'어머니, 걱정 마세요'라고 쓴다", statHint: "❤️온기+", effects: { warmth: 10 }, next: "student_03a" },
+      { text: "아무것도 쓰지 않는다 — 말이 나오지 않는다", statHint: "📜기록-", effects: { record: -5, duty: 5 }, next: "student_03b" },
+    ],
+  },
+
+  student_02b: {
+    location: "서울 종로 · 가족 곁",
+    title: "아직 여기에",
+    text: "어머니는 눈물을 감추며 이불 보따리를 쌉니다. 막내 동생은 무슨 일인지도 모르고 졸려서 징징거립니다.\n\n'오빠, 학교 안 가?' '오늘은 안 가.'\n\n창밖에서 사람들이 남쪽으로 흘러갑니다. 강을 건너야 한다는 소리가 들립니다.",
+    bg: "home_1950.jpg",
+    choices: [
+      { text: "가족을 이끌고 한강으로 향한다", statHint: "🛡️안전+", effects: { safety: 10, warmth: 5 }, next: "refugee_bridge" },
+      { text: "마을에 남아 이웃 노인들을 돕는다", statHint: "❤️온기↑ 🛡️안전↓", effects: { warmth: 15, safety: -10 }, next: "village_stay" },
+    ],
+  },
+
+  student_03a: {
+    location: "훈련소 · 경기도",
+    title: "사흘간의 훈련",
+    text: "총 쏘는 법을 배우는 데 사흘이 걸렸습니다. 실제 전선까지는 이틀이 걸렸습니다.\n\n참호 안에서 옆에 앉은 병사가 묻습니다. '고향이 어디야?' 그는 함경도 출신이었습니다. 이미 가족이 북에 있다고 했습니다.",
+    bg: "training_camp.jpg",
+    choices: [
+      { text: "그의 이야기를 들어주며 밤을 함께 보낸다", statHint: "❤️온기↑", effects: { warmth: 15, record: 5 }, next: "frontline_01" },
+      { text: "내일 전투를 위해 일찍 잠든다", statHint: "🛡️안전+", effects: { safety: 10 }, next: "frontline_01" },
+    ],
+  },
+
+  student_03b: {
+    location: "훈련소 · 경기도",
+    title: "빈칸",
+    text: "지원서의 그 빈칸이 자꾸 생각납니다. 할 말이 없었던 건지, 너무 많았던 건지.\n\n훈련 중에도, 행군 중에도, 그 빈칸이 눈앞에 어른거립니다.",
+    bg: "training_camp.jpg",
+    choices: [
+      { text: "편지를 쓴다 — 늦었지만, 지금이라도", statHint: "📜기록↑ ❤️온기+", effects: { record: 15, warmth: 10 }, next: "frontline_01" },
+      { text: "감정을 다스리고 임무에 집중한다", statHint: "⚖️책임↑", effects: { duty: 10 }, next: "frontline_01" },
+    ],
+  },
+
+  // ─── 통신병 스토리 ───
+
+  soldier_01: {
+    location: "육군 통신대 · 서울",
+    title: "마지막 주파수",
+    text: "당신의 무전기가 울립니다. 본부에서 긴급 명령이 내려옵니다. 하지만 신호가 끊겼다 이어졌다를 반복합니다.\n\n잡음 사이로 들리는 목소리: '...한강 다리... 폭파...'\n\n다리 근처에는 아직 피난민들이 건너고 있다는 것을 당신은 알고 있습니다.",
+    bg: "radio_operator.jpg",
+    choices: [
+      { text: "상관에게 피난민 상황을 즉시 보고한다", statHint: "⚖️책임↑ ❤️온기+", effects: { duty: 15, warmth: 10 }, next: "soldier_02a" },
+      { text: "신호를 계속 잡으려 무전기와 씨름한다", statHint: "📜기록+ ⚖️책임+", effects: { record: 10, duty: 10 }, next: "soldier_02b" },
+      { text: "명령을 그대로 전달한다 — 그것이 임무다", statHint: "⚖️책임↑ ❤️온기↓", effects: { duty: 20, warmth: -10 }, next: "soldier_02c" },
+    ],
+  },
+
+  soldier_02a: {
+    location: "한강 다리 · 새벽",
+    title: "아직 건너고 있습니다",
+    text: "보고를 받은 장교가 잠시 침묵합니다. '...얼마나 남았나?' '아직 수백 명이 넘고 있습니다.'\n\n장교의 표정이 굳습니다. 그는 결정을 내려야 합니다. 당신은 그 결정의 무게를 함께 느낍니다.",
+    bg: "hangang_bridge.jpg",
+    record: { title: "한강 인도교 폭파", text: "1950년 6월 28일 새벽, 한강 인도교가 폭파되었다. 다리 위의 피난민과 군인 수백 명이 희생되었다." },
+    choices: [
+      { text: "더 많은 사람이 건너도록 10분을 요청한다", statHint: "❤️온기↑ 🛡️안전↓", effects: { warmth: 15, safety: -10 }, next: "soldier_03" },
+      { text: "장교의 결정을 따른다 — 전선의 논리", statHint: "⚖️책임+ 🛡️안전+", effects: { duty: 5, safety: 10, warmth: -10 }, next: "soldier_03" },
+    ],
+  },
+
+  soldier_02b: {
+    location: "통신소 · 혼돈 속",
+    title: "잡음 속의 진실",
+    text: "무전기 너머로 수많은 목소리가 뒤섞입니다. 패주하는 군인들, 부르짖는 민간인들, 명령과 비명.\n\n당신은 이 모든 것을 듣고 있습니다. 기록해야 한다고 생각합니다. 누군가는 이것을 남겨야 한다고.",
+    bg: "radio_operator.jpg",
+    choices: [
+      { text: "들리는 것들을 노트에 받아 적는다", statHint: "📜기록↑↑", effects: { record: 20 }, next: "soldier_03" },
+      { text: "무전으로 현황을 본부에 계속 보고한다", statHint: "⚖️책임↑ 📜기록+", effects: { duty: 15, record: 10 }, next: "soldier_03" },
+    ],
+  },
+
+  soldier_02c: {
+    location: "한강 다리 · 새벽",
+    title: "명령은 명령이다",
+    text: "명령을 전달했습니다. 무전기를 내려놓았습니다.\n\n폭발 소리가 들렸을 때, 당신은 눈을 감았습니다. 명령이었다고, 어쩔 수 없었다고. 하지만 눈 뒤에는 다리를 건너던 사람들의 얼굴이 있었습니다.",
+    bg: "hangang_bridge.jpg",
+    choices: [
+      { text: "그 무게를 평생 안고 살아가기로 한다", statHint: "📜기록↑ ❤️온기-", effects: { record: 10, warmth: -5, duty: 5 }, next: "soldier_03" },
+      { text: "살아남기 위해 감정을 접는다", statHint: "🛡️안전+", effects: { safety: 15, warmth: -10 }, next: "soldier_03" },
+    ],
+  },
+
+  soldier_03: {
+    location: "남하 중 · 경기도 어딘가",
+    title: "후퇴",
+    text: "남쪽으로 후퇴합니다. 도로는 군인과 피난민이 뒤섞여 있습니다. 한 노인이 길가에 주저앉아 있습니다. 다리를 다친 것 같습니다.\n\n부대는 멈추지 않고 지나갑니다.",
+    bg: "retreat_road.jpg",
+    choices: [
+      { text: "노인을 등에 업고 함께 걷는다", statHint: "❤️온기↑↑ 🛡️안전↓", effects: { warmth: 20, safety: -15 }, next: "naktong_line" },
+      { text: "노인에게 가던 방향을 알려주고 계속 행군한다", statHint: "⚖️책임+", effects: { duty: 10 }, next: "naktong_line" },
+      { text: "잠시 멈춰 비상식량을 건네고 떠난다", statHint: "❤️온기+ 🛡️안전+", effects: { warmth: 10, safety: 5 }, next: "naktong_line" },
+    ],
+  },
+
+  // ─── 어머니 스토리 ───
+
+  mother_01: {
+    location: "서울 마포 · 집",
+    title: "두 아이의 손",
+    text: "한 손에는 여덟 살 딸아이, 다른 손에는 다섯 살 아들. 등에는 쌀 두 되와 이불 하나.\n\n길은 이미 사람들로 가득합니다. 모두 같은 방향을 보고 있습니다. 남쪽.",
+    bg: "mother_refugee.jpg",
+    choices: [
+      { text: "남편을 기다린다 — 아직 돌아오지 않았다", statHint: "❤️온기+ 🛡️안전↓", effects: { warmth: 15, safety: -15 }, next: "mother_02a" },
+      { text: "지금 당장 아이들을 데리고 떠난다", statHint: "🛡️안전↑", effects: { safety: 20, warmth: -5 }, next: "refugee_bridge" },
+    ],
+  },
+
+  mother_02a: {
+    location: "서울 마포 · 집",
+    title: "기다림",
+    text: "하루가 지났습니다. 총소리가 가까워집니다. 아이들은 배가 고파 웁니다.\n\n이웃이 창문을 두드립니다. '아직도 있어요? 빨리 떠나야 해요!'\n\n남편을 찾아야 합니다. 하지만 아이들을 두고 갈 수는 없습니다.",
+    bg: "home_waiting.jpg",
+    choices: [
+      { text: "아이들과 함께 이웃을 따라 떠난다", statHint: "🛡️안전+ ❤️온기+", effects: { safety: 15, warmth: 10 }, next: "refugee_bridge" },
+      { text: "아이들을 이웃에게 맡기고 남편을 찾으러 간다", statHint: "❤️온기↑↑ 🛡️안전↓↓", effects: { warmth: 20, safety: -20 }, next: "mother_search" },
+    ],
+  },
+
+  mother_search: {
+    location: "서울 거리 · 혼돈",
+    title: "이름을 부르며",
+    text: "이름을 불렀습니다. 거리마다, 골목마다. 사람들은 당신을 밀치며 지나갑니다.\n\n다친 군인 하나가 벽에 기대어 있습니다. 그는 당신의 남편이 아닙니다.",
+    bg: "street_chaos.jpg",
+    choices: [
+      { text: "다친 군인에게 물을 건네고 이름을 물어본다", statHint: "❤️온기↑ 📜기록+", effects: { warmth: 15, record: 10 }, next: "refugee_bridge" },
+      { text: "계속 남편을 찾아 거리를 헤맨다", statHint: "❤️온기↑ 🛡️안전↓↓", effects: { warmth: 10, safety: -20 }, next: "refugee_bridge" },
+    ],
+  },
+
+  // ─── 기자 스토리 ───
+
+  journalist_01: {
+    location: "신문사 · 서울",
+    title: "첫 보도",
+    text: "편집장이 말합니다. '지금 당장 나가서 뭔가 찍어 와. 사람들이 알아야 해.'\n\n카메라와 수첩을 들고 나왔습니다. 거리는 이미 공황 상태입니다.\n\n편집장이 조용히 덧붙입니다. '근데... 도망칠 거면 지금 도망쳐도 돼.'",
+    bg: "newspaper_office.jpg",
+    choices: [
+      { text: "취재를 시작한다 — 이것이 내 일이다", statHint: "📜기록↑↑ 🛡️안전↓", effects: { record: 20, safety: -10, duty: 10 }, next: "journalist_02a" },
+      { text: "피난길에 오르며 사진을 찍는다", statHint: "📜기록+ 🛡️안전+", effects: { record: 15, safety: 10 }, next: "journalist_02b" },
+    ],
+  },
+
+  journalist_02a: {
+    location: "서울 거리 · 전쟁 첫날",
+    title: "셔터 소리",
+    text: "카메라를 들었습니다. 눈앞에 펼쳐진 것들: 울고 있는 노인, 뛰어가는 군인들, 버려진 신발 한 짝, 아직 펼쳐져 있는 신문.\n\n어디에 렌즈를 향해야 할지 알 수 없습니다. 모든 것이 역사의 순간입니다.",
+    bg: "street_war.jpg",
+    record: { title: "1950년 6월 25일의 서울", text: "그날의 서울을 기록한 사진들이 훗날 전쟁의 증거가 되었다. 기록은 기억보다 오래 산다." },
+    choices: [
+      { text: "피난 가는 가족들의 얼굴을 찍는다", statHint: "📜기록↑ ❤️온기+", effects: { record: 15, warmth: 10 }, next: "refugee_bridge" },
+      { text: "무너진 건물과 전선을 기록한다", statHint: "📜기록↑↑", effects: { record: 20 }, next: "refugee_bridge" },
+      { text: "부상병을 먼저 돕고 카메라는 내려놓는다", statHint: "❤️온기↑↑ 📜기록↓", effects: { warmth: 20, record: -10 }, next: "refugee_bridge" },
+    ],
+  },
+
+  journalist_02b: {
+    location: "피난길 · 도로",
+    title: "함께 걷는 사람들",
+    text: "피난 행렬 속에 있습니다. 사람들이 이야기를 합니다. 어디서 왔는지, 어디로 가는지, 두고 온 것이 무엇인지.\n\n수첩에 받아 적습니다. 이름, 나이, 고향. 그들은 왜 당신에게 말을 거는 것일까요. 어쩌면 누군가가 들어준다는 것 자체가, 위안인지도 모릅니다.",
+    bg: "refugee_road.jpg",
+    choices: [
+      { text: "모든 이야기를 꼼꼼히 기록한다", statHint: "📜기록↑↑", effects: { record: 20, warmth: 5 }, next: "refugee_bridge" },
+      { text: "그들과 함께 걷는 것에 집중한다", statHint: "❤️온기↑", effects: { warmth: 15 }, next: "refugee_bridge" },
+    ],
+  },
+
+  // ════════════════════════════════
+  //  ACT 2 — 피난길, 낙동강 전선
+  // ════════════════════════════════
+
+  village_stay: {
+    location: "서울 · 텅 빈 마을",
+    title: "남은 사람들",
+    text: "마을에 남은 것은 노인들과 몇몇 아이들뿐입니다. 당신은 우물에서 물을 길어 나르고, 음식을 나눕니다.\n\n사흘이 지났습니다. 인민군이 들어왔습니다.",
+    bg: "empty_village.jpg",
+    choices: [
+      { text: "조용히 지내며 주목받지 않으려 한다", statHint: "🛡️안전+", effects: { safety: 15 }, next: "occupation_01" },
+      { text: "노인들을 데리고 밤에 피난을 시도한다", statHint: "❤️온기↑ 🛡️안전↓", effects: { warmth: 20, safety: -15 }, next: "refugee_bridge" },
+    ],
+  },
+
+  occupation_01: {
+    location: "점령된 마을",
+    title: "새로운 주인",
+    text: "인민군 병사 하나가 당신의 집에 머물게 되었습니다. 그는 말이 없고, 밥도 거의 먹지 않습니다. 어느 날 그가 조용히 말합니다. '나도... 집에 가고 싶소.'",
+    bg: "occupied_village.jpg",
+    choices: [
+      { text: "아무 말 하지 않는다 — 적이다", statHint: "🛡️안전+", effects: { safety: 10 }, next: "liberation_01" },
+      { text: "그에게 밥 한 그릇을 내밀며 고개를 끄덕인다", statHint: "❤️온기↑ 🛡️안전↓", effects: { warmth: 15, safety: -10 }, next: "liberation_01" },
+    ],
+  },
+
+  liberation_01: {
+    location: "마을 · 9월",
+    title: "인천상륙작전",
+    text: "라디오에서 소식이 들립니다. 인천에 유엔군이 상륙했다고.\n\n마을 분위기가 바뀝니다. 인민군이 물러납니다. 사람들이 하나둘 돌아오기 시작합니다.\n\n당신은 이 마을에서 석 달을 버텼습니다.",
+    bg: "liberation_village.jpg",
+    choices: [
+      { text: "돌아온 이웃들과 함께 마을을 정리한다", statHint: "❤️온기+", effects: { warmth: 15, duty: 10 }, next: "naktong_line" },
+      { text: "이 석 달을 노트에 기록하기 시작한다", statHint: "📜기록↑↑", effects: { record: 20 }, next: "naktong_line" },
+    ],
+  },
+
+  refugee_bridge: {
+    location: "한강 · 피난 행렬",
+    title: "다리 위에서",
+    text: "한강 다리는 사람들로 꽉 막혔습니다. 뒤에서는 포성이, 앞에서는 아무것도 보이지 않습니다.\n\n다리 난간에 기대어 있는 사람이 보입니다. 그는 움직이지 않습니다. 살아있는지 모르겠습니다.",
+    bg: "hangang_bridge.jpg",
+    choices: [
+      { text: "그에게 다가가 어깨를 흔든다", statHint: "❤️온기↑ 🛡️안전↓", effects: { warmth: 15, safety: -10 }, next: "bridge_moment" },
+      { text: "지나친다 — 멈추면 죽는다", statHint: "🛡️안전+", effects: { safety: 15, warmth: -10 }, next: "south_01" },
+      { text: "주변 사람에게 저 사람 좀 봐달라고 부탁한다", statHint: "❤️온기+ 🛡️안전+", effects: { warmth: 10, safety: 5 }, next: "south_01" },
+    ],
+  },
+
+  bridge_moment: {
+    location: "한강 다리 위",
+    title: "살아있어요",
+    text: "그는 살아있습니다. 다리가 풀려서 움직일 수가 없었다고 합니다. 아내와 아이들은 앞서 건넜다고.\n\n당신은 그를 부축해서 다리를 건넙니다. 무거웠습니다. 하지만 당신은 끝까지 놓지 않았습니다.",
+    bg: "hangang_bridge.jpg",
+    choices: [
+      { text: "강 건너에서 그의 가족을 함께 찾는다", statHint: "❤️온기↑↑", effects: { warmth: 20, safety: -5 }, next: "south_01" },
+      { text: "무사히 건넌 것을 확인하고 각자의 길로 간다", statHint: "⚖️책임+", effects: { duty: 10, warmth: 5 }, next: "south_01" },
+    ],
+  },
+
+  south_01: {
+    location: "경기도 · 피난길",
+    title: "끝없는 길",
+    text: "걷고 또 걷습니다. 발에 물집이 생겼고, 배는 고프고, 하늘에서는 가끔 비행기가 지납니다.\n\n길가에 누군가 버리고 간 짐 보따리가 있습니다. 안에는 쌀과 옷, 그리고 가족사진이 있습니다.",
+    bg: "refugee_road.jpg",
+    choices: [
+      { text: "쌀은 가져가고 사진은 나무에 붙여둔다", statHint: "❤️온기+ 🛡️안전+", effects: { warmth: 10, safety: 10 }, next: "naktong_line" },
+      { text: "모든 것을 그대로 두고 지나친다", statHint: "", effects: {}, next: "naktong_line" },
+      { text: "사진을 챙긴다 — 언젠가 전해줄 수 있을지도", statHint: "❤️온기+ 📜기록+", effects: { warmth: 10, record: 10 }, next: "naktong_line" },
+    ],
+  },
+
+  naktong_line: {
+    location: "낙동강 · 1950년 8월",
+    title: "낙동강 방어선",
+    text: "마지막 방어선입니다. 낙동강 너머로는 물러설 수 없습니다.\n\n강가에 천막이 쳐져 있습니다. 부상병들, 피난민들, 지쳐 쓰러진 군인들.\n\n한 학생병이 당신 옆에 앉아 무언가를 씁니다. 편지인 듯합니다. 그는 열여섯쯤 되어 보입니다.",
+    bg: "naktong_river.jpg",
+    record: { title: "낙동강 방어선", text: "1950년 8월, UN군과 국군이 낙동강 일대에서 최후의 방어선을 구축했다. '부산 교두보'라 불린 이 방어선에서 수만 명이 목숨을 잃었다." },
+    choices: [
+      { text: "그 옆에 앉아 조용히 말을 건다", statHint: "❤️온기↑", effects: { warmth: 15, record: 5 }, next: "student_letter" },
+      { text: "부상병들을 돌보는 것을 돕는다", statHint: "❤️온기+ ⚖️책임+", effects: { warmth: 10, duty: 15 }, next: "medical_tent" },
+      { text: "혼자 강을 바라보며 생각을 정리한다", statHint: "📜기록+", effects: { record: 10 }, next: "river_reflection" },
+    ],
+  },
+
+  student_letter: {
+    location: "낙동강 · 천막 옆",
+    title: "어머니께",
+    text: "소년이 쓰던 편지를 내려놓습니다. '부쳐도 닿지 않을 것 같아서요.' 그는 쓴웃음을 짓습니다.\n\n'그래도 써요. 쓰는 동안은 어머니가 살아 계신 것 같아서.'\n\n잠시 침묵이 흐릅니다.",
+    bg: "naktong_river.jpg",
+    choices: [
+      { text: "대신 부쳐주겠다고 약속한다", statHint: "❤️온기↑ ⚖️책임↑", effects: { warmth: 15, duty: 15 }, next: "promise_01" },
+      { text: "내 이야기도 들려준다", statHint: "❤️온기+ 📜기록+", effects: { warmth: 10, record: 10 }, next: "promise_01" },
+      { text: "그저 곁에 있어준다", statHint: "❤️온기+", effects: { warmth: 10 }, next: "promise_01" },
+    ],
+  },
+
+  promise_01: {
+    location: "낙동강 방어선",
+    title: "약속",
+    text: "다음 날 전투가 시작됩니다. 당신은 그 소년을 다시 보지 못했습니다.\n\n편지는 당신의 품에 있습니다.\n\n그의 이름은 김성호, 열여섯 살, 경북 안동 출신.",
+    bg: "battle_naktong.jpg",
+    record: { title: "김성호의 편지", text: "수많은 학도병들이 남긴 편지들은 훗날 유족들에게 전해졌다. 그리고 일부는 영영 전해지지 못했다." },
+    choices: [
+      { text: "편지를 반드시 전하겠다고 다짐한다", statHint: "⚖️책임↑↑ ❤️온기+", effects: { duty: 20, warmth: 10 }, next: "heungnam_01" },
+      { text: "그의 이름을 어딘가에 새겨 남긴다", statHint: "📜기록↑↑", effects: { record: 20 }, next: "heungnam_01" },
+    ],
+  },
+
+  medical_tent: {
+    location: "낙동강 · 야전병원",
+    title: "살리는 손",
+    text: "의무병도 부족하고 약도 부족합니다. 당신은 할 수 있는 것을 합니다. 물을 먹이고, 천을 갈고, 손을 잡아줍니다.\n\n한 병사가 숨을 거둘 때 당신의 손을 놓지 않았습니다.",
+    bg: "medical_tent.jpg",
+    choices: [
+      { text: "그가 속삭인 마지막 말을 기억해둔다", statHint: "📜기록↑ ❤️온기+", effects: { record: 15, warmth: 10 }, next: "heungnam_01" },
+      { text: "다음 부상자에게로 간다 — 슬퍼할 시간이 없다", statHint: "⚖️책임+ 🛡️안전+", effects: { duty: 15, safety: 5 }, next: "heungnam_01" },
+    ],
+  },
+
+  river_reflection: {
+    location: "낙동강 강가",
+    title: "강이 흐른다",
+    text: "강은 전쟁과 상관없이 흐릅니다. 물결 소리가 포성보다 크게 들리는 순간이 있습니다.\n\n당신은 이 강이 기억하고 있을 것들을 생각합니다. 수백 년 전부터 이 자리를 흘렀을 강이.",
+    bg: "naktong_river.jpg",
+    choices: [
+      { text: "강가에 이름을 새긴다 — 내가 여기 있었다고", statHint: "📜기록↑", effects: { record: 15 }, next: "heungnam_01" },
+      { text: "수첩을 꺼내 오늘을 기록한다", statHint: "📜기록↑↑", effects: { record: 20, warmth: 5 }, next: "heungnam_01" },
+    ],
+  },
+
+  frontline_01: {
+    location: "전선 · 어딘가",
+    title: "참호 안에서",
+    text: "포격이 멈추고 정적이 찾아옵니다. 이 정적이 가장 무섭다고 참호 안 사람들은 말합니다.\n\n옆 참호에서 신음 소리가 들립니다. 다친 것 같습니다.",
+    bg: "trench_1950.jpg",
+    choices: [
+      { text: "포격이 재개될 위험을 무릅쓰고 달려간다", statHint: "❤️온기↑↑ 🛡️안전↓↓", effects: { warmth: 25, safety: -20 }, next: "heungnam_01" },
+      { text: "잠잠해질 때까지 기다린다", statHint: "🛡️안전+ ⚖️책임+", effects: { safety: 15, duty: 5 }, next: "heungnam_01" },
+      { text: "구호 신호를 외쳐 의무병을 부른다", statHint: "❤️온기+ ⚖️책임+", effects: { warmth: 10, duty: 15 }, next: "heungnam_01" },
+    ],
+  },
+
+  // ════════════════════════════════
+  //  ACT 3 — 흥남 철수 작전
+  // ════════════════════════════════
+
+  heungnam_01: {
+    location: "함경남도 흥남 · 1950년 12월",
+    title: "마지막 배",
+    text: "중공군이 밀려옵니다. 유엔군은 바다로 철수합니다. 흥남 부두에는 믿을 수 없을 만큼 많은 사람들이 모여 있습니다.\n\n군함 한 척이 남아 있습니다. 이미 군인과 물자로 가득합니다. 하지만 부두에는 아직 수만 명의 피난민이 있습니다.",
+    bg: "heungnam_port.jpg",
+    record: { title: "흥남 철수 작전", text: "1950년 12월, 흥남 철수 작전에서 메러디스 빅토리호는 화물을 버리고 약 14,000명의 피난민을 태웠다. '크리스마스의 기적'으로 불린다." },
+    choices: [
+      { text: "군인으로서 먼저 배에 오른다 — 명령이다", statHint: "⚖️책임+ 🛡️안전↑", effects: { duty: 15, safety: 20, warmth: -10 }, next: "heungnam_02a" },
+      { text: "피난민들이 먼저 탈 수 있도록 자리를 양보한다", statHint: "❤️온기↑↑ 🛡️안전↓", effects: { warmth: 25, safety: -20, duty: 5 }, next: "heungnam_02b" },
+      { text: "노약자와 아이들을 배에 밀어 올린다", statHint: "❤️온기↑ ⚖️책임+", effects: { warmth: 20, duty: 15 }, next: "heungnam_02c" },
+    ],
+  },
+
+  heungnam_02a: {
+    location: "군함 · 흥남 앞바다",
+    title: "돌아보다",
+    text: "배가 천천히 부두를 떠납니다. 뒤에 남은 사람들이 보입니다. 손을 흔드는 사람, 울부짖는 사람, 그냥 서 있는 사람.\n\n배의 갑판이 발 아래서 흔들립니다. 당신은 난간을 잡고 서 있습니다.",
+    bg: "ship_departure.jpg",
+    choices: [
+      { text: "끝까지 그들을 바라보며 기억에 새긴다", statHint: "📜기록↑ ❤️온기+", effects: { record: 15, warmth: 10 }, next: "heungnam_03" },
+      { text: "선실로 내려간다 — 볼 수가 없다", statHint: "🛡️안전+", effects: { safety: 10 }, next: "heungnam_03" },
+    ],
+  },
+
+  heungnam_02b: {
+    location: "흥남 부두 · 남은 자",
+    title: "남겨진 자리",
+    text: "배가 떠납니다. 당신은 부두에 남았습니다. 다음 배가 올지 모릅니다. 아니, 오지 않을 수도 있습니다.\n\n옆에 선 사람들과 눈이 마주칩니다. 같은 마음입니다.",
+    bg: "heungnam_port.jpg",
+    choices: [
+      { text: "다음 배를 기다리며 사람들을 안정시킨다", statHint: "❤️온기+ ⚖️책임↑", effects: { warmth: 15, duty: 20 }, next: "heungnam_miracle" },
+      { text: "다른 탈출로를 찾아 움직인다", statHint: "🛡️안전+", effects: { safety: 20 }, next: "heungnam_03" },
+    ],
+  },
+
+  heungnam_02c: {
+    location: "흥남 부두 → 군함",
+    title: "밀어 올린 손",
+    text: "당신은 아이들을 안아 올리고, 노인의 손을 잡아 당겼습니다. 배가 거의 가득 찼을 때 누군가 외쳤습니다. '더는 안 됩니다!'\n\n당신은 그 말을 들었지만, 마지막으로 한 아이를 더 올렸습니다.",
+    bg: "heungnam_boarding.jpg",
+    choices: [
+      { text: "자신도 배에 오른다", statHint: "🛡️안전+", effects: { safety: 15, warmth: 10 }, next: "heungnam_miracle" },
+      { text: "자리를 더 내어주고 부두에 남는다", statHint: "❤️온기↑↑ 🛡️안전↓↓", effects: { warmth: 25, safety: -20 }, next: "heungnam_miracle" },
+    ],
+  },
+
+  heungnam_miracle: {
+    location: "흥남 · 크리스마스의 기적",
+    title: "14,000명",
+    text: "메러디스 빅토리호는 군수물자를 버리고 피난민을 태웠습니다. 공식 정원의 수십 배.\n\n배 위에서 아이가 태어났습니다. 사람들은 그 아이의 이름을 '기적'이라 불렀습니다.\n\n당신은 이 장면을 눈에 담습니다.",
+    bg: "meredith_victory.jpg",
+    record: { title: "기적의 항해", text: "1950년 12월 25일, 메러디스 빅토리호가 14,000명의 피난민을 태우고 거제도에 도착했다. 항해 중 다섯 아이가 태어났다." },
+    choices: [
+      { text: "이 기적을 기록한다 — 반드시 알려야 한다", statHint: "📜기록↑↑", effects: { record: 20 }, next: "after_war_01" },
+      { text: "안도감에 눈물을 흘린다 — 살았다", statHint: "❤️온기+", effects: { warmth: 15 }, next: "after_war_01" },
+    ],
+  },
+
+  heungnam_03: {
+    location: "바다 · 거제도로",
+    title: "항해",
+    text: "배가 파도를 가릅니다. 갑판은 사람들로 가득하고, 선실에는 겨울 냉기가 스며듭니다.\n\n누군가 낮은 목소리로 노래를 부릅니다. 고향 노래입니다. 하나둘 따라 부릅니다.",
+    bg: "sea_night.jpg",
+    choices: [
+      { text: "함께 노래한다", statHint: "❤️온기+", effects: { warmth: 15 }, next: "after_war_01" },
+      { text: "노래 가사를 수첩에 적는다", statHint: "📜기록+", effects: { record: 10, warmth: 5 }, next: "after_war_01" },
+    ],
+  },
+
+  // ════════════════════════════════
+  //  ACT 4 — 전쟁 이후, 기억
+  // ════════════════════════════════
+
+  after_war_01: {
+    location: "거제도 · 1950년 겨울",
+    title: "도착",
+    text: "땅을 밟았습니다. 남쪽 땅.\n\n하지만 이것이 끝이 아닙니다. 전쟁은 3년이나 더 계속되었습니다.\n\n당신은 이 낯선 곳에서 무엇을 합니까?",
+    bg: "geoje_island.jpg",
+    choices: [
+      { text: "다시 전선으로 돌아간다", statHint: "⚖️책임↑↑ 🛡️안전↓", effects: { duty: 25, safety: -20 }, next: "return_front" },
+      { text: "피난민 캠프에서 사람들을 돕는다", statHint: "❤️온기↑ ⚖️책임+", effects: { warmth: 20, duty: 10 }, next: "refugee_camp" },
+      { text: "이 모든 것을 기록하기 시작한다", statHint: "📜기록↑↑", effects: { record: 25 }, next: "the_record" },
+    ],
+  },
+
+  return_front: {
+    location: "전선 · 1951년",
+    title: "다시 총을 든다",
+    text: "당신은 다시 왔습니다. 전선은 조금 달라졌지만, 본질은 같습니다. 추위와 공포와 기다림.\n\n어느 날 밤, 무전기에서 낯익은 목소리가 들립니다. 오래전 헤어진 동료입니다.",
+    bg: "trench_winter.jpg",
+    choices: [
+      { text: "'살아 있었군' — 그것만으로 충분하다", statHint: "❤️온기+ 📜기록+", effects: { warmth: 15, record: 10 }, next: "armistice_01" },
+      { text: "임무를 먼저 전달하고 감정은 나중으로 미룬다", statHint: "⚖️책임+", effects: { duty: 15 }, next: "armistice_01" },
+    ],
+  },
+
+  refugee_camp: {
+    location: "거제도 피난민 캠프",
+    title: "이름을 부르는 사람",
+    text: "캠프에는 수천 명이 있습니다. 혼자 온 아이들, 가족을 잃은 노인들, 이름도 모르는 사람들.\n\n당신은 이름표를 만들기 시작합니다. 한 사람씩, 이름과 고향과 찾는 사람의 이름을.",
+    bg: "refugee_camp.jpg",
+    record: { title: "이름표 프로젝트", text: "전쟁 중 수십만 명의 이산가족이 생겨났다. 많은 이들이 이름조차 알리지 못한 채 흩어졌다." },
+    choices: [
+      { text: "끝까지 모든 사람의 이름을 기록한다", statHint: "📜기록↑↑ ❤️온기+", effects: { record: 20, warmth: 15 }, next: "armistice_01" },
+      { text: "아이들이 가족을 찾도록 돕는 일에 집중한다", statHint: "❤️온기↑↑", effects: { warmth: 25, duty: 10 }, next: "armistice_01" },
+    ],
+  },
+
+  the_record: {
+    location: "거제도 · 작은 방",
+    title: "기록",
+    text: "낡은 공책 하나를 구했습니다. 처음부터 씁니다. 6월 25일 새벽, 라디오 소리. 한강 다리 위의 얼굴들. 낙동강의 정적. 흥남 부두의 손들.\n\n쓰다 보니, 당신이 기억하는 것보다 더 많은 것을 당신이 느꼈다는 것을 알게 됩니다.",
+    bg: "writing_record.jpg",
+    choices: [
+      { text: "이름을 기억하는 사람들의 이름을 하나씩 쓴다", statHint: "📜기록↑↑ ❤️온기+", effects: { record: 25, warmth: 15 }, next: "armistice_01" },
+      { text: "당신 자신의 이야기도 쓴다", statHint: "📜기록+ ❤️온기+", effects: { record: 15, warmth: 15 }, next: "armistice_01" },
+    ],
+  },
+
+  armistice_01: {
+    location: "판문점 · 1953년 7월 27일",
+    title: "정전",
+    text: "전쟁이 멈췄습니다. 정확히는, 잠시 멈췄습니다.\n\n38선이 다시 그어졌습니다. 3년 전과 거의 같은 자리에.\n\n수십만 명이 죽었습니다. 군인도, 시민도, 이름을 남기지 못한 사람들도.",
+    bg: "armistice.jpg",
+    record: { title: "정전협정", text: "1953년 7월 27일, 정전협정이 체결되었다. 3년 1개월의 전쟁에서 남북한 군인과 민간인 약 300만 명이 희생되었다." },
+    choices: [
+      { text: "눈물이 난다 — 살아남은 것이 미안하다", statHint: "❤️온기+ 📜기록+", effects: { warmth: 10, record: 10 }, next: "memorial_01" },
+      { text: "이제 무엇을 해야 하나 생각한다", statHint: "⚖️책임+", effects: { duty: 15 }, next: "memorial_01" },
+      { text: "아무 감정도 느껴지지 않는다", statHint: "🛡️안전+", effects: { safety: 10, warmth: -5 }, next: "memorial_01" },
+    ],
+  },
+
+  memorial_01: {
+    location: "서울 · 전쟁 이후",
+    title: "기억할 이유",
+    text: "세월이 흘렀습니다. 서울은 다시 지어졌고, 사람들은 다시 살아갔습니다.\n\n6월이 오면, 아직 그날을 기억하는 사람들이 있습니다.\n\n당신은 현충원에 왔습니다. 비석에 새겨진 수많은 이름들. 새겨지지 못한 더 많은 이름들.",
+    bg: "memorial_cemetery.jpg",
+    choices: [
+      { text: "알지 못하는 비석 앞에 오래 서 있는다", statHint: "❤️온기+ 📜기록+", effects: { warmth: 15, record: 15 }, next: "final_scene" },
+      { text: "내가 알던 사람들의 이름을 찾는다", statHint: "❤️온기+", effects: { warmth: 20 }, next: "final_scene" },
+      { text: "묵묵히 고개를 숙인다", statHint: "⚖️책임+ ❤️온기+", effects: { duty: 10, warmth: 10 }, next: "final_scene" },
+    ],
+  },
+
+  final_scene: {
+    location: "현충일 · 6월 6일",
+    title: "왜 기억하는가",
+    text: "누군가 묻습니다. '왜 아직도 이것을 기억합니까?'\n\n당신은 잠시 생각합니다.\n\n그 전쟁 속에서 선택을 했던 사람들을 생각합니다. 정답 없는 순간들. 누군가의 손을 잡고, 편지를 쓰고, 자리를 지킨 사람들.\n\n이 나라의 오늘이 그들의 어제로 만들어졌다는 것을.",
+    bg: "memorial_flower.jpg",
+    choices: [
+      { text: "'기억하지 않으면, 그들이 다시 죽는 것이니까요'", statHint: "📜기록↑ ❤️온기+", effects: { record: 20, warmth: 15 }, next: "ENDING" },
+      { text: "'그 선택들이 우리가 여기 있는 이유니까요'", statHint: "⚖️책임+ 📜기록+", effects: { duty: 15, record: 15 }, next: "ENDING" },
+      { text: "아무 말 없이 꽃 한 송이를 내려놓는다", statHint: "❤️온기+ 📜기록+", effects: { warmth: 20, record: 10 }, next: "ENDING" },
+    ],
+  },
+
+}; // end SCENES
+
+// ── ENGINE ───────────────────────────────────────────────────────────
+
+let typewriterTimeout = null;
+let isTyping = false;
+let fullText = '';
+
+function startGame() {
+  const titleScreen = document.getElementById('title-screen');
+  titleScreen.style.opacity = '0';
+  setTimeout(() => {
+    titleScreen.classList.add('hidden');
+    document.getElementById('stats-bar').classList.add('visible');
+    document.getElementById('game-area').classList.add('visible');
+    document.getElementById('records-btn').classList.add('visible');
+    loadScene('intro_01');
+    rotateMemorialQuote();
+    tryAutoPlayAudio();
+  }, 1500);
+}
+
+function tryAutoPlayAudio() {
+  const audio = document.getElementById('bg-audio');
+  if (audio.src) {
+    audio.play().then(() => {
+      state.audioOn = true;
+      document.getElementById('audio-btn').textContent = '♪';
+    }).catch(() => {
+      state.audioOn = false;
+      document.getElementById('audio-btn').textContent = '♩';
+    });
+  }
+}
+
+function toggleAudio() {
+  const audio = document.getElementById('bg-audio');
+  const btn = document.getElementById('audio-btn');
+  if (state.audioOn) {
+    audio.pause();
+    state.audioOn = false;
+    btn.textContent = '♩';
+  } else {
+    audio.play().then(() => { state.audioOn = true; btn.textContent = '♪'; }).catch(() => {});
+  }
+}
+
+function toggleRecords() {
+  const panel = document.getElementById('records-panel');
+  panel.classList.toggle('open');
+  renderRecords();
+}
+
+function renderRecords() {
+  const list = document.getElementById('records-list');
+  if (state.records.length === 0) {
+    list.innerHTML = '<div class="record-empty">아직 수집된 기록이 없습니다</div>';
+    return;
+  }
+  list.innerHTML = state.records.map(r => `
+    <div class="record-card">
+      <div class="record-card-title">${r.title}</div>
+      <div class="record-card-text">${r.text}</div>
+    </div>
+  `).join('');
+}
+
+function loadScene(sceneId, instant = false) {
+  if (sceneId === 'ENDING') {
+    showEnding();
+    return;
+  }
+
+  const scene = SCENES[sceneId];
+  if (!scene) {
+    showEnding();
+    return;
+  }
+
+  state.currentScene = sceneId;
+  state.history.push(sceneId);
+  state.sceneCount++;
+
+  const doLoad = () => {
+    // Background
+    const bg = document.getElementById('scene-bg');
+    if (scene.bg) {
+      bg.style.backgroundImage = `url('${CONFIG.bgImageBase}${scene.bg}')`;
+    } else {
+      bg.style.backgroundImage = 'none';
+    }
+
+    // Location
+    document.getElementById('location-tag').textContent = scene.location || '';
+
+    // Record badge
+    const badge = document.getElementById('record-badge');
+    if (scene.record) {
+      badge.classList.remove('hidden');
+      if (!state.records.find(r => r.title === scene.record.title)) {
+        state.records.push(scene.record);
+      }
+    } else {
+      badge.classList.add('hidden');
+    }
+
+    // Title
+    document.getElementById('scene-title').textContent = scene.title || '';
+
+    // Text (typewriter)
+    startTypewriter(scene.text || '');
+
+    // Choices
+    renderChoices(scene.choices || []);
+
+    // Scene counter
+    document.getElementById('scene-counter').textContent = `${state.sceneCount} / ∞`;
+
+    // Continue button hidden initially
+    document.getElementById('continue-btn').classList.remove('show');
+  };
+
+  if (instant) {
+    doLoad();
+  } else {
+    doTransition(doLoad);
+  }
+}
+
+function doTransition(callback) {
+  const overlay = document.getElementById('transition-overlay');
+  overlay.classList.add('flash');
+  setTimeout(() => {
+    callback();
+    setTimeout(() => {
+      overlay.classList.remove('flash');
+    }, 300);
+  }, CONFIG.transitionDuration);
+}
+
+function startTypewriter(text) {
+  fullText = text;
+  const el = document.getElementById('scene-text');
+  el.textContent = '';
+  isTyping = true;
+
+  if (typewriterTimeout) clearTimeout(typewriterTimeout);
+
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      el.textContent = text.slice(0, i + 1);
+      i++;
+      typewriterTimeout = setTimeout(type, CONFIG.typewriterSpeed);
+    } else {
+      isTyping = false;
+      el.innerHTML = text.replace(/\n/g, '<br>');
+    }
+  }
+  type();
+}
+
+function skipTypewriter() {
+  if (isTyping) {
+    clearTimeout(typewriterTimeout);
+    isTyping = false;
+    document.getElementById('scene-text').innerHTML = fullText.replace(/\n/g, '<br>');
+  }
+}
+
+document.getElementById('scene-text').addEventListener('click', skipTypewriter);
+
+function renderChoices(choices) {
+  const container = document.getElementById('choices');
+  container.innerHTML = '';
+  if (!choices || choices.length === 0) return;
+
+  choices.forEach((choice, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `${choice.text}${choice.statHint ? `<span class="choice-stat-hint">${choice.statHint}</span>` : ''}`;
+    btn.onclick = () => makeChoice(choice);
+    container.appendChild(btn);
+  });
+}
+
+function makeChoice(choice) {
+  // Apply flag
+  if (choice.flag) {
+    state.flags[choice.flag] = true;
+  }
+
+  // Apply stat effects
+  const effects = choice.effects || {};
+  const changes = [];
+  Object.entries(effects).forEach(([stat, delta]) => {
+    if (delta === 0) return;
+    const oldVal = state.stats[stat];
+    state.stats[stat] = Math.max(0, Math.min(100, oldVal + delta));
+    const diff = state.stats[stat] - oldVal;
+    if (diff !== 0) {
+      const statLabels = { warmth: '❤️온기', safety: '🛡️안전', record: '📜기록', duty: '⚖️책임' };
+      changes.push({ label: statLabels[stat], delta: diff });
+    }
+  });
+
+  updateStatsUI();
+  showStatChanges(changes);
+
+  // Next scene
+  setTimeout(() => {
+    loadScene(choice.next || 'ENDING');
+  }, 400);
+}
+
+function updateStatsUI() {
+  Object.entries(state.stats).forEach(([stat, val]) => {
+    const bar = document.getElementById(`stat-${stat}-bar`);
+    const valEl = document.getElementById(`stat-${stat}-val`);
+    if (bar) bar.style.width = val + '%';
+    if (valEl) valEl.textContent = val;
+  });
+}
+
+function showStatChanges(changes) {
+  const container = document.getElementById('stat-popup-container');
+  changes.forEach(({ label, delta }) => {
+    const el = document.createElement('div');
+    el.className = `stat-change ${delta > 0 ? 'up' : 'down'}`;
+    el.textContent = `${label} ${delta > 0 ? '+' : ''}${delta}`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 2000);
+  });
+}
+
+function handleContinue() {
+  loadScene(state.currentScene); // shouldn't be called, but fallback
+}
+
+// ── ENDING ───────────────────────────────────────────────────────────
+
+function showEnding() {
+  const stats = state.stats;
+
+  // Determine ending
+  let ending = null;
+
+  // Hidden ending first (special condition)
+  if (state.records.length >= 4 && stats.record >= 65 && stats.warmth >= 55) {
+    ending = ENDINGS.hidden_memorial;
+  }
+
+  if (!ending) {
+    // Student sacrifice
+    if (state.flags.is_student && stats.duty >= 60) {
+      ending = ENDINGS.youthful_sacrifice;
+    }
+  }
+
+  if (!ending) {
+    // Find best matching ending by condition score
+    const candidates = Object.entries(ENDINGS)
+      .filter(([, e]) => !e.hidden && e.condition(state.stats, state.flags))
+      .map(([id, e]) => {
+        let score = 0;
+        if (e.condition(state.stats, state.flags)) score += 10;
+        return { id, e, score };
+      });
+
+    if (candidates.length > 0) {
+      // Pick the best by dominant stat
+      const dominantStat = Object.entries(stats).sort((a,b) => b[1]-a[1])[0][0];
+      const statEndingMap = {
+        warmth: 'keeper',
+        safety: 'survivor',
+        record: 'chronicler',
+        duty: 'sentinel',
+      };
+      const preferred = statEndingMap[dominantStat];
+      ending = ENDINGS[preferred] || candidates[0].e;
+    } else {
+      ending = ENDINGS.shadow;
+    }
+  }
+
+  // Render ending
+  document.getElementById('ending-title').textContent = ending.title;
+  document.getElementById('ending-text').innerHTML = (ending.text || '').replace(/\n/g, '<br>');
+  document.getElementById('ending-reflection').innerHTML = `<p>${ending.reflection || ''}</p>`;
+
+  const statsHtml = [
+    { icon: '❤️', label: '온기', key: 'warmth' },
+    { icon: '🛡️', label: '안전', key: 'safety' },
+    { icon: '📜', label: '기록', key: 'record' },
+    { icon: '⚖️', label: '책임', key: 'duty' },
+  ].map(s => `
+    <div class="ending-stat-item">
+      <div class="ending-stat-label">${s.icon} ${s.label}</div>
+      <div class="ending-stat-value">${state.stats[s.key]}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('ending-stats').innerHTML = statsHtml + `
+    <div class="ending-stat-item" style="grid-column:1/-1">
+      <div class="ending-stat-label">📜 수집한 기록 카드</div>
+      <div class="ending-stat-value">${state.records.length}장</div>
+    </div>
+  `;
+
+  const screen = document.getElementById('ending-screen');
+  screen.classList.add('visible');
+}
+
+function restartGame() {
+  state = {
+    currentScene: 'intro_01',
+    stats: { warmth: 50, safety: 50, record: 50, duty: 50 },
+    flags: {},
+    records: [],
+    sceneCount: 0,
+    audioOn: state.audioOn,
+    history: [],
+  };
+  updateStatsUI();
+  document.getElementById('ending-screen').classList.remove('visible');
+  document.getElementById('records-panel').classList.remove('open');
+  loadScene('intro_01', true);
+}
+
+function rotateMemorialQuote() {
+  const el = document.getElementById('memorial-quote');
+  let idx = 0;
+  function next() {
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.textContent = MEMORIAL_QUOTES[idx % MEMORIAL_QUOTES.length];
+      el.style.transition = 'opacity 1.5s ease';
+      el.style.opacity = '1';
+      idx++;
+    }, 800);
+  }
+  next();
+  setInterval(next, 8000);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+updateStatsUI();
+</script>
+</body>
+</html>
